@@ -15,20 +15,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->connectButton->setIcon(KIcon("dialog-ok"));
 
     // Start setting up the Telepathy AccountManager.
-     Tp::AccountFactoryPtr  accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
+    Tp::AccountFactoryPtr  accountFactory = Tp::AccountFactory::create(QDBusConnection::sessionBus(),
                                                                         Tp::Features() << Tp::Account::FeatureCore
                                                                         << Tp::Account::FeatureAvatar
                                                                         << Tp::Account::FeatureProtocolInfo
                                                                         << Tp::Account::FeatureProfile);
 
-     m_accountManager = Tp::AccountManager::create(accountFactory);
+    m_accountManager = Tp::AccountManager::create(accountFactory);
 
-     connect(m_accountManager->becomeReady(),
+    connect(m_accountManager->becomeReady(),
              SIGNAL(finished(Tp::PendingOperation*)),
              SLOT(onAccountManagerReady(Tp::PendingOperation*)));
 
-     m_accountsListModel = new AccountsListModel(this);
-     ui->accountCombo->setModel(m_accountsListModel);
+    m_accountsListModel = new AccountsListModel(this);
+    ui->accountCombo->setModel(m_accountsListModel);
 }
 
 MainWindow::~MainWindow()
