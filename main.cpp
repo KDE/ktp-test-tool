@@ -4,7 +4,7 @@
 #include <KAboutData>
 #include <KLocale>
 
-#include "channel-joinerwindow.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
