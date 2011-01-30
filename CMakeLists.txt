@@ -24,6 +24,8 @@ set(CHANNEL-JOINER_SRCS
     mainwindow.cpp
     account-item.cpp
     accounts-list-model.cpp
+    contactlistmodel.cpp
+    contactmodelfilter.cpp
     main.cpp
 )
 

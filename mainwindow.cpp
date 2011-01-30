@@ -3,6 +3,8 @@
 
 #include "accounts-list-model.h"
 #include "account-item.h"
+#include "contactlistmodel.h"
+#include "contactmodelfilter.h"
 
 #include <TelepathyQt4/PendingReady>
 #include <TelepathyQt4/PendingChannelRequest>
@@ -13,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
 {
+    Tp::registerTypes();
+
     ui->setupUi(this);
     ui->cancelButton->setIcon(KIcon("dialog-cancel"));
     ui->connectButton->setIcon(KIcon("dialog-ok"));
@@ -34,6 +38,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->accountCombo->setModel(m_accountsListModel);
 
 
+    m_contactListModel = new ContactListModel(this);
+    ContactModelFilter* filter = new ContactModelFilter(this);
+    filter->setSourceModel(m_contactListModel);
+    filter->sort(0, Qt::AscendingOrder);
+    filter->setDynamicSortFilter(true);
+//    filter->setFilterFixedString("foo");
+    ui->listView->setModel(filter);
+
     connect(ui->connectButton, SIGNAL(released()), SLOT(onConnectClicked()));
 }
 
@@ -49,6 +61,7 @@ void MainWindow::onAccountManagerReady(Tp::PendingOperation *op)
     foreach (Tp::AccountPtr account, accounts) {
         m_accountsListModel->addAccount(account);
     }
+    m_contactListModel->setAccount(accounts[0]);
 }
 
 void MainWindow::onConnectClicked()

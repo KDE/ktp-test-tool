@@ -6,6 +6,7 @@
 #include <TelepathyQt4/AccountManager>
 
 class AccountsListModel;
+class ContactListModel;
 
 namespace Ui {
     class MainWindow;
@@ -32,7 +33,9 @@ private Q_SLOTS:
 private:
     Ui::MainWindow *ui;
     Tp::AccountManagerPtr m_accountManager;
+
     AccountsListModel *m_accountsListModel;
+    ContactListModel *m_contactListModel;
 
 };
 
