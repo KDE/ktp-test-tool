@@ -28,7 +28,18 @@ MainWindow::MainWindow(QWidget *parent) :
                                                                         << Tp::Account::FeatureProtocolInfo
                                                                         << Tp::Account::FeatureProfile);
 
-    m_accountManager = Tp::AccountManager::create(accountFactory);
+    Tp::ConnectionFactoryPtr connectionFactory = Tp::ConnectionFactory::create(QDBusConnection::sessionBus(),
+                                                                              Tp::Features() << Tp::Connection::FeatureCore
+                                                                              <<  Tp::Connection::FeatureRosterGroups
+                                                                              << Tp::Connection::FeatureRoster);
+
+    Tp::ContactFactoryPtr contactFactory = Tp::ContactFactory::create(Tp::Features()  << Tp::Contact::FeatureAlias
+                                                                      << Tp::Contact::FeatureAvatarData
+                                                                      << Tp::Contact::FeatureSimplePresence);
+
+    Tp::ChannelFactoryPtr channelFactory = Tp::ChannelFactory::create(QDBusConnection::sessionBus());
+
+    m_accountManager = Tp::AccountManager::create(QDBusConnection::sessionBus(), accountFactory, connectionFactory, channelFactory, contactFactory);
 
     connect(m_accountManager->becomeReady(),
              SIGNAL(finished(Tp::PendingOperation*)),
@@ -43,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) :
     filter->setSourceModel(m_contactListModel);
     filter->sort(0, Qt::AscendingOrder);
     filter->setDynamicSortFilter(true);
-//    filter->setFilterFixedString("foo");
     ui->listView->setModel(filter);
 
     connect(ui->connectButton, SIGNAL(released()), SLOT(onConnectClicked()));
@@ -66,12 +76,18 @@ void MainWindow::onAccountManagerReady(Tp::PendingOperation *op)
 
 void MainWindow::onConnectClicked()
 {
-    int currentIndex = ui->accountCombo->currentIndex();
-    AccountItem* accountItem = m_accountsListModel->itemForIndex(m_accountsListModel->index(currentIndex, 0));
-    if (accountItem) {
-        Tp::PendingChannelRequest* channelRequest = accountItem->account()->ensureTextChatroom(ui->channelEdit->text());
-        connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
-    }
+    QModelIndex index = ui->listView->currentIndex();
+    Tp::ContactPtr contact = m_contactListModel->contact(index);
+    Tp::Account account =
+            Tp::PendingChannelRequest* channelRequest = account->ensureTextChat(contact);
+
+
+//    int currentIndex = ui->accountCombo->currentIndex();
+//    AccountItem* accountItem = m_accountsListModel->itemForIndex(m_accountsListModel->index(currentIndex, 0));
+//    if (accountItem) {
+//        Tp::PendingChannelRequest* channelRequest = accountItem->account()->ensureTextChatroom(ui->channelEdit->text());
+//        connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
+//    }
 }
 
 void MainWindow::onChannelJoined(Tp::PendingOperation *op)

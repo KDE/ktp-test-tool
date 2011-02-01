@@ -23,6 +23,8 @@ public:
     explicit ContactListModel(QObject *parent = 0);
     void setAccount(Tp::AccountPtr account);
 
+    Tp::ContactPtr contact(const QModelIndex &index) const;
+
 protected:
     QVariant data(const QModelIndex &index, int role) const;
     int rowCount(const QModelIndex &parent) const;
@@ -32,8 +34,6 @@ signals:
 public slots:
 
 private slots:
-    void onConnectionReady(Tp::PendingOperation *op);
-    void onContactsUpgraded(Tp::PendingOperation *op);
     void onContactUpdated();
 
 private:

@@ -18,40 +18,18 @@ void ContactListModel::setAccount(Tp::AccountPtr account)
 {
     qDebug() << account->displayName();
     if (account->connection()) {
-        Tp::PendingReady* op = account->connection()->becomeReady(Tp::Features() << Tp::Connection::FeatureCore
-                                                                  <<  Tp::Connection::FeatureRosterGroups
-                                                                  << Tp::Connection::FeatureRoster);
+        Tp::ContactManagerPtr contactManager = account->connection()->contactManager();
 
-        connect(op, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onConnectionReady(Tp::PendingOperation*)));
+        QList<Tp::ContactPtr> newContacts = contactManager->allKnownContacts().toList();
+
+        //need to add a connection to each contact to emit updated when applicable.
+
+        beginInsertRows(QModelIndex(), 0, newContacts.size());
+        m_contacts.append(newContacts);
+        endInsertRows();
+
     }
 }
-
-void ContactListModel::onConnectionReady(Tp::PendingOperation *op)
-{
-    Tp::ConnectionPtr connection = Tp::ConnectionPtr::dynamicCast(op->object());
-
-    Tp::ContactManagerPtr contactManager = connection->contactManager();
-    Tp::PendingContacts *pendingContacts = contactManager->upgradeContacts(contactManager->allKnownContacts().toList(),
-                                                                           Tp::Features() << Tp::Contact::FeatureAlias << Tp::Contact::FeatureAvatarData << Tp::Contact::FeatureSimplePresence);
-    connect(pendingContacts, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onContactsUpgraded(Tp::PendingOperation*)));
-}
-
-void ContactListModel::onContactsUpgraded(Tp::PendingOperation *po)
-{
-    Tp::PendingContacts* pendingContacts = qobject_cast<Tp::PendingContacts*>(po);
-
-    QList<Tp::ContactPtr> newContacts;
-
-    foreach(Tp::ContactPtr contact, pendingContacts->contacts()) {
-        newContacts.append(contact);
-    }
-
-    beginInsertRows(QModelIndex(), 0, newContacts.size());
-    m_contacts.append(newContacts);
-    endInsertRows();
-
-}
-
 
 int ContactListModel::rowCount(const QModelIndex &parent) const
 {
@@ -90,8 +68,16 @@ QVariant ContactListModel::data(const QModelIndex &index, int role) const
 
 void ContactListModel::onContactUpdated()
 {
-    //get contact from sender
-    //emit modelupdated..
+    Tp::Contact* c = qobject_cast<Tp::Contact*>(sender());
+    Tp::ContactPtr contact = Tp::ContactPtr(c);
+
+    QModelIndex index = createIndex(m_contacts.lastIndexOf(contact), 0);
+    emit dataChanged(index, index);
+}
+
+Tp::ContactPtr ContactListModel::contact(const QModelIndex &index) const
+{
+    return m_contacts.at(index.row());
 }
 
 
