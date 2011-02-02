@@ -50,11 +50,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     m_contactListModel = new ContactListModel(this);
-    ContactModelFilter* filter = new ContactModelFilter(this);
-    filter->setSourceModel(m_contactListModel);
-    filter->sort(0, Qt::AscendingOrder);
-    filter->setDynamicSortFilter(true);
-    ui->listView->setModel(filter);
+    m_contactModelFilter = new ContactModelFilter(this);
+    m_contactModelFilter->setSourceModel(m_contactListModel);
+    m_contactModelFilter->sort(0, Qt::AscendingOrder);
+    m_contactModelFilter->setDynamicSortFilter(true);
+    ui->listView->setModel(m_contactModelFilter);
 
     connect(ui->connectButton, SIGNAL(released()), SLOT(onConnectClicked()));
 }
@@ -77,16 +77,16 @@ void MainWindow::onAccountManagerReady(Tp::PendingOperation *op)
 void MainWindow::onConnectClicked()
 {
     QModelIndex index = ui->listView->currentIndex();
-    Tp::ContactPtr contact = m_contactListModel->contact(index);
-    Tp::Account account =
-            Tp::PendingChannelRequest* channelRequest = account->ensureTextChat(contact);
+    Tp::ContactPtr contact = m_contactListModel->contact(m_contactModelFilter->mapToSource(index));
+    Tp::AccountPtr account = m_contactListModel->account();
 
+    Tp::PendingChannelRequest* channelRequest = account->ensureTextChat(contact);
+    connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
 
 //    int currentIndex = ui->accountCombo->currentIndex();
 //    AccountItem* accountItem = m_accountsListModel->itemForIndex(m_accountsListModel->index(currentIndex, 0));
 //    if (accountItem) {
 //        Tp::PendingChannelRequest* channelRequest = accountItem->account()->ensureTextChatroom(ui->channelEdit->text());
-//        connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
 //    }
 }
 
@@ -95,8 +95,5 @@ void MainWindow::onChannelJoined(Tp::PendingOperation *op)
     if (op->isError()) {
         qDebug() << op->errorName();
         qDebug() << op->errorMessage();
-    }
-    else {
-        close();
     }
 }

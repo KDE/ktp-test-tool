@@ -7,6 +7,7 @@
 
 class AccountsListModel;
 class ContactListModel;
+class ContactModelFilter;
 
 namespace Ui {
     class MainWindow;
@@ -36,6 +37,7 @@ private:
 
     AccountsListModel *m_accountsListModel;
     ContactListModel *m_contactListModel;
+    ContactModelFilter *m_contactModelFilter;
 
 };
 

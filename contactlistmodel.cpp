@@ -14,9 +14,16 @@ ContactListModel::ContactListModel(QObject *parent) :
 {
 }
 
+Tp::AccountPtr ContactListModel::account() const
+{
+    return m_account;
+}
+
 void ContactListModel::setAccount(Tp::AccountPtr account)
 {
-    qDebug() << account->displayName();
+    m_account = account;
+
+    //FIXME move this to a "loadContacts" method, which is also run if accountConnectionState changes
     if (account->connection()) {
         Tp::ContactManagerPtr contactManager = account->connection()->contactManager();
 
@@ -79,6 +86,7 @@ Tp::ContactPtr ContactListModel::contact(const QModelIndex &index) const
 {
     return m_contacts.at(index.row());
 }
+
 
 
 

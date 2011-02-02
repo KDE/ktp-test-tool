@@ -21,6 +21,8 @@ public:
 
 
     explicit ContactListModel(QObject *parent = 0);
+
+    Tp::AccountPtr account() const;
     void setAccount(Tp::AccountPtr account);
 
     Tp::ContactPtr contact(const QModelIndex &index) const;
@@ -38,6 +40,7 @@ private slots:
 
 private:
     QList<Tp::ContactPtr> m_contacts;
+    Tp::AccountPtr m_account;
 };
 
 #endif // CONTACTLISTMODEL_H
