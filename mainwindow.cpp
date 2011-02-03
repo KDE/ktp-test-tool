@@ -6,6 +6,8 @@
 #include "contactlistmodel.h"
 #include "contactmodelfilter.h"
 
+#include <QMenu>
+
 #include <TelepathyQt4/PendingReady>
 #include <TelepathyQt4/PendingChannelRequest>
 
@@ -59,7 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_contactModelFilter->setDynamicSortFilter(true);
     ui->listView->setModel(m_contactModelFilter);
 
-    connect(ui->connectButton, SIGNAL(released()), SLOT(onConnectClicked()));
+    QMenu* connectMenu = new QMenu(this);
+    connectMenu->addAction("Start Text Chat", this , SLOT(startTextChannel()));
+    connectMenu->addAction("Start Audio Chat", this , SLOT(startAudioChannel()));
+    connectMenu->addAction("Start Video Chat", this , SLOT(startVideoChannel()));
+
+    ui->connectButton->setMenu(connectMenu);
+
     connect(ui->accountCombo, SIGNAL(currentIndexChanged(int)),SLOT(onAccountSelectionChanaged()));
 }
 
@@ -70,7 +78,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::onAccountManagerReady(Tp::PendingOperation *op)
 {
-    qDebug() << "account manager ready";
+    if (op->isError()) {
+        //I know I should be using kDebug.. but qDebug actually works. so meh.
+        qDebug() << op->errorName();
+        qDebug() << op->errorMessage();
+    }
+
     // Add all the accounts to the Accounts Model.
     QList<Tp::AccountPtr> accounts = m_accountManager->allAccounts();
     foreach (Tp::AccountPtr account, accounts) {
@@ -88,16 +101,50 @@ void MainWindow::onAccountSelectionChanaged()
 }
 
 
-//FIXME this will be a menu button and have a slot for start text chat, audio video, tubes and stuff.
-void MainWindow::onConnectClicked()
+void MainWindow::startTextChannel()
 {
     QModelIndex index = ui->listView->currentIndex();
+    if (! index.isValid()) {
+        return;
+    }
+
     Tp::ContactPtr contact = m_contactListModel->contact(m_contactModelFilter->mapToSource(index));
     Tp::AccountPtr account = m_contactListModel->account();
 
     Tp::PendingChannelRequest* channelRequest = account->ensureTextChat(contact);
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
 }
+
+void MainWindow::startAudioChannel()
+{
+    QModelIndex index = ui->listView->currentIndex();
+    if (! index.isValid()) {
+        return;
+    }
+
+    Tp::ContactPtr contact = m_contactListModel->contact(m_contactModelFilter->mapToSource(index));
+    Tp::AccountPtr account = m_contactListModel->account();
+
+    Tp::PendingChannelRequest* channelRequest = account->ensureStreamedMediaAudioCall(contact);
+    connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
+}
+
+
+void MainWindow::startVideoChannel()
+{
+    QModelIndex index = ui->listView->currentIndex();
+    if (! index.isValid()) {
+        return;
+    }
+
+    Tp::ContactPtr contact = m_contactListModel->contact(m_contactModelFilter->mapToSource(index));
+    Tp::AccountPtr account = m_contactListModel->account();
+
+    Tp::PendingChannelRequest* channelRequest = account->ensureStreamedMediaVideoCall(contact);
+    connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
+}
+
+
 
 void MainWindow::onChannelJoined(Tp::PendingOperation *op)
 {

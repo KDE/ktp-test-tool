@@ -30,7 +30,10 @@ private Q_SLOTS:
     void onAccountManagerReady(Tp::PendingOperation *op);
     void onAccountSelectionChanaged();
     void onChannelJoined(Tp::PendingOperation *op);
-    void onConnectClicked();
+    void startTextChannel();
+    void startAudioChannel();
+    void startVideoChannel();
+
 
 private:
     Ui::MainWindow *ui;

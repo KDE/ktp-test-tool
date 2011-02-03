@@ -49,7 +49,6 @@ int ContactListModel::rowCount(const QModelIndex &parent) const
 QVariant ContactListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) {
-        qDebug() << "invalid index";
         return QVariant();
     }
 
@@ -84,6 +83,9 @@ void ContactListModel::onContactUpdated()
 
 Tp::ContactPtr ContactListModel::contact(const QModelIndex &index) const
 {
+    if (! index.isValid()) {
+        return Tp::ContactPtr();
+    }
     return m_contacts.at(index.row());
 }
 
