@@ -28,6 +28,7 @@ public:
 
 private Q_SLOTS:
     void onAccountManagerReady(Tp::PendingOperation *op);
+    void onAccountSelectionChanaged();
     void onChannelJoined(Tp::PendingOperation *op);
     void onConnectClicked();
 

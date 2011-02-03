@@ -9,13 +9,16 @@
 #include <TelepathyQt4/PendingReady>
 #include <TelepathyQt4/PendingChannelRequest>
 
-#include <QDebug>
+#include <KDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWindow)
 {
     Tp::registerTypes();
+
+
+    kDebug() << "This is NOT a fully feature complete contact list, or a product that should ever be shipped. It is for development testing only, use at your own risk.";
 
     ui->setupUi(this);
     ui->cancelButton->setIcon(KIcon("dialog-cancel"));
@@ -57,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listView->setModel(m_contactModelFilter);
 
     connect(ui->connectButton, SIGNAL(released()), SLOT(onConnectClicked()));
+    connect(ui->accountCombo, SIGNAL(currentIndexChanged(int)),SLOT(onAccountSelectionChanaged()));
 }
 
 MainWindow::~MainWindow()
@@ -66,14 +70,25 @@ MainWindow::~MainWindow()
 
 void MainWindow::onAccountManagerReady(Tp::PendingOperation *op)
 {
+    qDebug() << "account manager ready";
     // Add all the accounts to the Accounts Model.
     QList<Tp::AccountPtr> accounts = m_accountManager->allAccounts();
     foreach (Tp::AccountPtr account, accounts) {
         m_accountsListModel->addAccount(account);
     }
-    m_contactListModel->setAccount(accounts[0]);
+    onAccountSelectionChanaged();
 }
 
+
+void MainWindow::onAccountSelectionChanaged()
+{
+    QModelIndex index = m_accountsListModel->index(ui->accountCombo->currentIndex(),0);
+    Tp::AccountPtr account = m_accountsListModel->itemForIndex(index)->account();
+    m_contactListModel->setAccount(account);
+}
+
+
+//FIXME this will be a menu button and have a slot for start text chat, audio video, tubes and stuff.
 void MainWindow::onConnectClicked()
 {
     QModelIndex index = ui->listView->currentIndex();
@@ -82,12 +97,6 @@ void MainWindow::onConnectClicked()
 
     Tp::PendingChannelRequest* channelRequest = account->ensureTextChat(contact);
     connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
-
-//    int currentIndex = ui->accountCombo->currentIndex();
-//    AccountItem* accountItem = m_accountsListModel->itemForIndex(m_accountsListModel->index(currentIndex, 0));
-//    if (accountItem) {
-//        Tp::PendingChannelRequest* channelRequest = accountItem->account()->ensureTextChatroom(ui->channelEdit->text());
-//    }
 }
 
 void MainWindow::onChannelJoined(Tp::PendingOperation *op)

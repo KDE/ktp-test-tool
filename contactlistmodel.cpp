@@ -22,9 +22,10 @@ Tp::AccountPtr ContactListModel::account() const
 void ContactListModel::setAccount(Tp::AccountPtr account)
 {
     m_account = account;
+    clear();
 
     //FIXME move this to a "loadContacts" method, which is also run if accountConnectionState changes
-    if (account->connection()) {
+    if (account->connectionStatus() == Tp::ConnectionStatusConnected && account->connection()) {
         Tp::ContactManagerPtr contactManager = account->connection()->contactManager();
 
         QList<Tp::ContactPtr> newContacts = contactManager->allKnownContacts().toList();
@@ -34,7 +35,6 @@ void ContactListModel::setAccount(Tp::AccountPtr account)
         beginInsertRows(QModelIndex(), 0, newContacts.size());
         m_contacts.append(newContacts);
         endInsertRows();
-
     }
 }
 
@@ -87,8 +87,12 @@ Tp::ContactPtr ContactListModel::contact(const QModelIndex &index) const
     return m_contacts.at(index.row());
 }
 
-
-
+void ContactListModel::clear()
+{
+    beginRemoveRows(QModelIndex(), 0, m_contacts.size());
+    m_contacts.clear();
+    endRemoveRows();
+}
 
 
 

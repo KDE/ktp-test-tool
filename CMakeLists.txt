@@ -1,4 +1,4 @@
-project(channel-joiner-app)
+project(kde-telepathy-test-tool)
 
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
 
@@ -32,16 +32,16 @@ set(CHANNEL-JOINER_SRCS
 kde4_add_ui_files(CHANNEL-JOINER_SRCS mainwindow.ui)
 
 # Create the plasmoid
-kde4_add_executable(channel-joiner ${CHANNEL-JOINER_SRCS})
+kde4_add_executable(kde-telepathy-test-tool ${CHANNEL-JOINER_SRCS})
 
 # Link against the needed libraries
-target_link_libraries(channel-joiner
+target_link_libraries(kde-telepathy-test-tool
   ${KDE4_KDEUI_LIBS}
   ${TELEPATHY_QT4_LIBRARIES}
 )
 
-install(TARGETS channel-joiner ${INSTALL_TARGETS_DEFAULT_ARGS})
-install(FILES channel-joiner.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
+install(TARGETS kde-telepathy-test-tool ${INSTALL_TARGETS_DEFAULT_ARGS})
+# install(FILES kde-telepathy-test-tool.desktop DESTINATION ${XDG_APPS_INSTALL_DIR})
 
 macro_display_feature_log()
 

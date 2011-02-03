@@ -37,6 +37,7 @@ public slots:
 
 private slots:
     void onContactUpdated();
+    void clear();
 
 private:
     QList<Tp::ContactPtr> m_contacts;
