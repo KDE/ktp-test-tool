@@ -27,6 +27,7 @@
 #include "contactmodelfilter.h"
 
 #include <QMenu>
+#include <QInputDialog>
 
 #include <TelepathyQt4/PendingReady>
 #include <TelepathyQt4/PendingChannelRequest>
@@ -88,6 +89,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->connectButton->setMenu(connectMenu);
 
+    connect(ui->joinRoomButton, SIGNAL(released()), SLOT(onJoinRoomClicked()));
     connect(ui->accountCombo, SIGNAL(currentIndexChanged(int)),SLOT(onAccountSelectionChanaged()));
 }
 
@@ -172,4 +174,15 @@ void MainWindow::onChannelJoined(Tp::PendingOperation *op)
         qDebug() << op->errorName();
         qDebug() << op->errorMessage();
     }
+}
+
+void MainWindow::onJoinRoomClicked()
+{
+    Tp::AccountPtr account = m_contactListModel->account();
+
+    QString chatRoom = QInputDialog::getText(this, "Telepathy Test Tool", "Enter room name:");
+
+    Tp::PendingChannelRequest* channelRequest = account->ensureTextChatroom(chatRoom);
+    connect(channelRequest, SIGNAL(finished(Tp::PendingOperation*)), SLOT(onChannelJoined(Tp::PendingOperation*)));
+
 }
